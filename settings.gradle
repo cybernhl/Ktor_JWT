@@ -1,0 +1,71 @@
+pluginManagement {
+    repositories {
+        gradlePluginPortal()
+        mavenCentral()
+        google()
+        maven {
+            url "https://plugins.gradle.org/m2/"
+        }
+        maven {
+            url = uri('https://maven.pkg.jetbrains.space/public/p/compose/dev')
+        }
+        maven {
+            url = uri('https://maven.pkg.jetbrains.space/public/p/ktor/eap')
+        }
+        maven {
+            url "https://raw.githubusercontent.com/cybernhl/maven-repository/master/"
+        }
+
+        maven {
+            url = uri('https://jitpack.io')
+        }
+        maven {
+            url = uri('https://s3.amazonaws.com/repo.commonsware.com')
+        }
+    }
+//    plugins {
+//    }
+//    resolutionStrategy {
+//    }
+}
+
+dependencyResolutionManagement {
+    repositories {
+        google()
+        mavenCentral()
+        maven {
+            url "https://plugins.gradle.org/m2/"
+        }
+        maven {
+            url = uri('https://maven.pkg.jetbrains.space/public/p/compose/dev')
+        }
+        maven {
+            url = uri('https://maven.pkg.jetbrains.space/public/p/ktor/eap')
+        }
+        maven {
+            url "https://raw.githubusercontent.com/cybernhl/maven-repository/master/"
+        }
+
+        maven {
+            url = uri('https://jitpack.io')
+        }
+        maven {
+            url = uri('https://s3.amazonaws.com/repo.commonsware.com')
+        }
+    }
+}
+
+rootProject.name = "Ktor_JWT_OpenAPI"
+////server
+include ':server'
+project(":server").projectDir = file("./server/server")
+////share
+include ':shared'
+project(":shared").projectDir = file("./share/shared")
+include ':db'
+project(":db").projectDir = file("./share/db")
+include ':entity'
+project(":entity").projectDir = file("./share/entity")
+////client
+include ':app'
+project(":app").projectDir = file("./client/app")

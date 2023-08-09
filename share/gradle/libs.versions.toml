@@ -1,0 +1,135 @@
+[versions]
+compileSdk = "33"
+targetSdk = "33"
+minSdk = "21"
+
+kotlin = "1.8.22"
+coroutines = "1.7.2"
+sqlDelight = "2.0.0"
+androidxSqlite = "2.3.1"
+saferoom = "1.3.0"
+androidSqlCipher = "4.5.4"
+iosSqlCipher = "4.5.4"
+sqlcipherKtnPod = "1.4.2"
+decompose = "2.0.0-compose-experimental"
+koin = "3.4.1"
+kotlinx-datetime = "0.4.0"
+napier = "2.6.1"
+mokoResources = "0.23.0"
+materialThemePrefs = "0.5.1"
+androidxActivityCompose = "1.7.2"
+androidxCoreSplashscreen = "1.0.1"
+androidxLegacySupport = "1.0.0"
+androidxPreference = "1.2.0"
+androidxMultidex = "2.0.1"
+androidxLifecycle = "2.6.1"
+androidxArch = "2.2.0"
+androidxTestExt = "1.1.5"
+androidxTest = "1.5.2"
+androidxTestOrchestrator = "1.4.2"
+googleAndroidMaterial = "1.9.0"
+firebase = "32.2.0"
+leakCanary = "2.12"
+junit = "4.13.2"
+mockito = "5.2.0"
+turbine = "1.0.0"
+espresso = "3.5.1"
+desugar = "2.0.3"
+
+[libraries]
+coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "coroutines" }
+coroutines-android = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-android", version.ref = "coroutines" }
+coroutines-swing = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-swing", version.ref = "coroutines" }
+coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "coroutines" }
+
+sqlDelight-gradlePlugin = { module = "app.cash.sqldelight:gradle-plugin", version.ref = "sqlDelight" }
+sqlDelight-runtime = { module = "app.cash.sqldelight:runtime", version.ref = "sqlDelight" }
+sqlDelight-android = { module = "app.cash.sqldelight:android-driver", version.ref = "sqlDelight" }
+sqlDelight-coroutinesExt = { module = "app.cash.sqldelight:coroutines-extensions", version.ref = "sqlDelight" }
+sqlDelight-native = { module = "app.cash.sqldelight:native-driver", version.ref = "sqlDelight" }
+sqlDelight-jvm = { module = "app.cash.sqldelight:sqlite-driver", version.ref = "sqlDelight" }
+
+androidx-sqlite = { module = "androidx.sqlite:sqlite", version.ref = "androidxSqlite" }
+androidx-sqlite-ktx = { module = "androidx.sqlite:sqlite-ktx", version.ref = "androidxSqlite" }
+androidx-sqlite-framework = { module = "androidx.sqlite:sqlite-framework", version.ref = "androidxSqlite" }
+
+commonsware-saferoom = { module = "com.commonsware.cwac:saferoom.x", version.ref = "saferoom" }
+
+android-sqlcipher = { module = "net.zetetic:android-database-sqlcipher", version.ref = "androidSqlCipher" }
+
+sqlcipherKtnPod = { module = "io.github.softartdev:sqlcipher-ktn-pod", version.ref = "sqlcipherKtnPod" }
+
+decompose = { module = "com.arkivanov.decompose:decompose", version.ref = "decompose" }
+decompose-extComposeJb = { module = "com.arkivanov.decompose:extensions-compose-jetbrains", version.ref = "decompose" }
+
+koin-core = { module = "io.insert-koin:koin-core", version.ref = "koin" }
+koin-core-jvm = { module = "io.insert-koin:koin-core-jvm", version.ref = "koin" }
+koin-android = { module = "io.insert-koin:koin-android", version.ref = "koin" }
+koin-androidx-compose = { module = "io.insert-koin:koin-androidx-compose", version = "3.4.5" } #TODO use version.ref = "koin" when 3.4.5 is released
+koin-test = { module = "io.insert-koin:koin-test", version.ref = "koin" }
+koin-test-junit4 = { module = "io.insert-koin:koin-test-junit4", version.ref = "koin" }
+
+kotlinx-datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.ref = "kotlinx-datetime" }
+
+napier = { module = "io.github.aakira:napier", version.ref = "napier" }
+
+mokoResources-generator = { module = "dev.icerock.moko:resources-generator", version.ref = "mokoResources" }
+mokoResources = { module = "dev.icerock.moko:resources", version.ref = "mokoResources" }
+mokoResources-compose = { module = "dev.icerock.moko:resources-compose", version.ref = "mokoResources" }
+mokoResources-test = { module = "dev.icerock.moko:resources-test", version.ref = "mokoResources" }
+
+material-theme-prefs = { module = "io.github.softartdev:material-theme-prefs", version.ref = "materialThemePrefs" }
+
+androidx-activity-compose = { module = "androidx.activity:activity-compose", version.ref = "androidxActivityCompose" }
+
+androidx-core-splashscreen = { module = "androidx.core:core-splashscreen", version.ref = "androidxCoreSplashscreen" }
+androidx-legacy-support = { module = "androidx.legacy:legacy-support-v4", version.ref = "androidxLegacySupport" }
+androidx-preference = { module = "androidx.preference:preference", version.ref = "androidxPreference" }
+androidx-multidex = { module = "androidx.multidex:multidex", version.ref = "androidxMultidex" }
+
+androidx-lifecycle-runtime = { module = "androidx.lifecycle:lifecycle-runtime-ktx", version.ref = "androidxLifecycle" }
+androidx-lifecycle-viewmodel = { module = "androidx.lifecycle:lifecycle-viewmodel-ktx", version.ref = "androidxLifecycle" }
+
+androidx-arch-core-common = { module = "androidx.arch.core:core-common", version.ref = "androidxArch" }
+androidx-arch-core-runtime = { module = "androidx.arch.core:core-runtime", version.ref = "androidxArch" }
+androidx-arch-core-testing = { module = "androidx.arch.core:core-testing", version.ref = "androidxArch" }
+
+androidx-test-ext-junit = { module = "androidx.test.ext:junit", version.ref = "androidxTestExt" }
+
+androidx-test-rules = { module = "androidx.test:rules", version.ref = "androidxTest" }
+androidx-test-runner = { module = "androidx.test:runner", version.ref = "androidxTest" }
+androidx-test-orchestrator = { module = "androidx.test:orchestrator", version.ref = "androidxTestOrchestrator" }
+
+google-android-material = { module = "com.google.android.material:material", version.ref = "googleAndroidMaterial" }
+
+firebase-bom = { module = "com.google.firebase:firebase-bom", version.ref = "firebase" }
+firebase-analytics = { module = "com.google.firebase:firebase-analytics" }
+firebase-crashlytics = { module = "com.google.firebase:firebase-crashlytics" }
+
+leakCanary-android = { module = "com.squareup.leakcanary:leakcanary-android", version.ref = "leakCanary" }
+leakCanary-android-process = { module = "com.squareup.leakcanary:leakcanary-android-process", version.ref = "leakCanary" }
+leakCanary-plumber-android = { module = "com.squareup.leakcanary:plumber-android", version.ref = "leakCanary" }
+leakCanary-android-instrumentation = { module = "com.squareup.leakcanary:leakcanary-android-instrumentation", version.ref = "leakCanary" }
+
+junit = { module = "junit:junit", version.ref = "junit" }
+
+mockito-core = { module = "org.mockito:mockito-core", version.ref = "mockito" }
+mockito-inline = { module = "org.mockito:mockito-inline", version.ref = "mockito" }
+
+turbine = { module = "app.cash.turbine:turbine", version.ref = "turbine" }
+
+espresso-core = { module = "androidx.test.espresso:espresso-core", version.ref = "espresso" }
+espresso-contrib = { module = "androidx.test.espresso:espresso-contrib", version.ref = "espresso" }
+espresso-idling-resource = { module = "androidx.test.espresso:espresso-idling-resource", version.ref = "espresso" }
+
+desugar = { module = "com.android.tools:desugar_jdk_libs", version.ref = "desugar" }
+kotlin-serialization = { group = "org.jetbrains.kotlin", name = "kotlin-serialization", version = "1.9.0" }
+
+[plugins]
+
+[bundles]
+mockito = ["mockito-core", "mockito-inline"]
+androidx-sqlite = ["androidx-sqlite", "androidx-sqlite-ktx", "androidx-sqlite-framework"]
+androidx-arch-core = ["androidx-arch-core-common", "androidx-arch-core-runtime"]
+androidx-test = ["androidx-test-rules", "androidx-test-runner"]
+espresso = ["espresso-core", "espresso-contrib"]
