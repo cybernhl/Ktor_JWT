@@ -1,9 +1,9 @@
-package tw.idv.neo.shared.data
+package tw.idv.neo.shared.data.request
 
 import kotlinx.serialization.*
 
 @Serializable
-data class User(
+data class AuthUser(
     val username: String,
     val password: String
 )

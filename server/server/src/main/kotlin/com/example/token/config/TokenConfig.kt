@@ -1,4 +1,4 @@
-package com.example
+package com.example.token.config
 
 data class TokenConfig(
     val audience: String,

@@ -1,7 +1,9 @@
-package com.example
+package com.example.token.service
 
 import com.auth0.jwt.JWT
 import com.auth0.jwt.algorithms.Algorithm
+import com.example.token.claim.TokenClaim
+import com.example.token.config.TokenConfig
 import java.util.Date
 
 class JwtTokenService {

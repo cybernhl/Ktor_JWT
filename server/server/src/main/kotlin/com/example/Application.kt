@@ -9,7 +9,6 @@ import io.ktor.server.plugins.contentnegotiation.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
-import kotlinx.serialization.*
 import kotlinx.serialization.json.Json
 import java.util.*
 import io.ktor.server.plugins.cors.routing.*
@@ -23,16 +22,16 @@ import io.ktor.server.auth.*
 import tw.idv.neo.shared.data.User
 
 import com.auth0.jwk.*
-import java.security.KeyFactory
-import java.security.spec.PKCS8EncodedKeySpec
+import com.example.token.config.TokenConfig
+import tw.idv.neo.shared.data.respond.AuthUser
 import java.util.concurrent.*
 
 fun Application.main() {
     val customerStorage = mutableListOf<User>()
     customerStorage.addAll(
         arrayOf(
-            User(1, "Jane", "Smith"),
-            User(2, "John", "Smith")
+            User("Jane", "fake1"),
+            User("John", "fake2")
         )
     )
 
@@ -51,7 +50,7 @@ fun Application.main() {
         audience = environment.config.property("jwt.audience").getString(),
         issuer = environment.config.property("jwt.issuer").getString(),
         expiresIn = 60000L,//Date(System.currentTimeMillis() + 60000)
-        secret =environment.config.property("jwt.secret").getString(),
+        secret = environment.config.property("jwt.secret").getString(),
         realm = environment.config.property("jwt.realm").getString()
     )
 
@@ -59,7 +58,7 @@ fun Application.main() {
         .cached(10, 24, TimeUnit.HOURS)
         .rateLimited(10, 1, TimeUnit.MINUTES)
         .build()
-    val jwtverifier=JWT
+    val jwtverifier = JWT
         .require(Algorithm.HMAC256(tokenConfig.secret))
         .withAudience(tokenConfig.audience)
         .withIssuer(tokenConfig.issuer)
@@ -86,13 +85,29 @@ fun Application.main() {
     routing {
         get("/user/{id}") {
             val id = call.parameters["id"]
-            val customer: User = customerStorage.find { it.id == id!!.toInt() }!!
-            call.respond(customer)
+            val user = customerStorage.getOrNull(id!!.toInt())
+            if (user == null) {
+                call.respond(HttpStatusCode.Conflict, "用户不存在")
+                return@get
+            } else {
+                call.respond(
+                    HttpStatusCode.OK,
+                    message = AuthUser(
+                        username = user.username,
+                        token = "fewfewqfe"
+                    )
+                )
+            }
         }
 
         post("/register") {
-            val customer = call.receive<User>()
-            customerStorage.add(customer)
+            val request = call.receiveNullable<tw.idv.neo.shared.data.request.AuthUser>() ?: kotlin.run {
+                call.respond(HttpStatusCode.BadRequest)
+                return@post
+            }
+
+            val user =  User(request.username,request.password)
+            customerStorage.add(user)
             call.respondText("User Customer stored correctly", status = HttpStatusCode.Created)
         }
 
@@ -110,7 +125,7 @@ fun Application.main() {
                 .withClaim("username", user.username)
                 .withExpiresAt(Date(System.currentTimeMillis() + tokenConfig.expiresIn))
                 .sign(Algorithm.HMAC256(tokenConfig.secret))
-            call.respond(hashMapOf("token" to token,"status" to HttpStatusCode.Created))
+            call.respond(hashMapOf("token" to token, "status" to HttpStatusCode.Created))
         }
 
         authenticate("auth-jwt") {
@@ -127,7 +142,7 @@ fun Application.main() {
         swaggerUI(path = "swagger", swaggerFile = "openapi/documentation.yaml") {
             version = "4.15.5"
         }
-        openAPI(path="openapi", swaggerFile = "openapi/documentation.yaml") {
+        openAPI(path = "openapi", swaggerFile = "openapi/documentation.yaml") {
             codegen = StaticHtmlCodegen()
         }
     }
