@@ -47,22 +47,26 @@ fun Application.main() {
         allowHeader(HttpHeaders.ContentType)
     }
 //    val privateKeyString = environment.config.property("jwt.privateKey").getString()
-    val secret = environment.config.property("jwt.secret").getString()
-    val issuer = environment.config.property("jwt.issuer").getString()
-    val audience = environment.config.property("jwt.audience").getString()
-    val myRealm = environment.config.property("jwt.realm").getString()
-    val jwkProvider = JwkProviderBuilder(issuer)
+    val tokenConfig = TokenConfig(
+        audience = environment.config.property("jwt.audience").getString(),
+        issuer = environment.config.property("jwt.issuer").getString(),
+        expiresIn = 60000L,//Date(System.currentTimeMillis() + 60000)
+        secret =environment.config.property("jwt.secret").getString(),
+        realm = environment.config.property("jwt.realm").getString()
+    )
+
+    val jwkProvider = JwkProviderBuilder(tokenConfig.issuer)
         .cached(10, 24, TimeUnit.HOURS)
         .rateLimited(10, 1, TimeUnit.MINUTES)
         .build()
     val jwtverifier=JWT
-        .require(Algorithm.HMAC256(secret))
-        .withAudience(audience)
-        .withIssuer(issuer)
+        .require(Algorithm.HMAC256(tokenConfig.secret))
+        .withAudience(tokenConfig.audience)
+        .withIssuer(tokenConfig.issuer)
         .build()
     install(Authentication) {
         jwt("auth-jwt") {
-            realm = myRealm
+            realm = tokenConfig.realm
             verifier(jwtverifier)
 //            verifier(jwkProvider, issuer) {
 //                acceptLeeway(3)
@@ -101,10 +105,10 @@ fun Application.main() {
 //            val privateKey = KeyFactory.getInstance("RSA").generatePrivate(keySpecPKCS8)
 
             val token = JWT.create()
-                .withAudience(audience)
-                .withIssuer(issuer)
+                .withAudience(tokenConfig.audience)
+                .withIssuer(tokenConfig.issuer)
                 .withClaim("username", user.username)
-                .withExpiresAt(Date(System.currentTimeMillis() + 60000))
+                .withExpiresAt(Date(System.currentTimeMillis() + tokenConfig.expiresIn))
                 .sign(Algorithm.HMAC256(secret))
             call.respond(hashMapOf("token" to token,"status" to HttpStatusCode.Created))
         }
