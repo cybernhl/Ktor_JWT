@@ -109,7 +109,7 @@ fun Application.main() {
                 .withIssuer(tokenConfig.issuer)
                 .withClaim("username", user.username)
                 .withExpiresAt(Date(System.currentTimeMillis() + tokenConfig.expiresIn))
-                .sign(Algorithm.HMAC256(secret))
+                .sign(Algorithm.HMAC256(tokenConfig.secret))
             call.respond(hashMapOf("token" to token,"status" to HttpStatusCode.Created))
         }
 
