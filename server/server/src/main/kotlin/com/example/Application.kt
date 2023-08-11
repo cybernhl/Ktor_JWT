@@ -23,9 +23,19 @@ import tw.idv.neo.shared.data.User
 
 import com.auth0.jwk.*
 import com.example.token.config.TokenConfig
+import io.ktor.server.engine.embeddedServer
+import io.ktor.server.netty.Netty
 import tw.idv.neo.shared.data.respond.AuthUser
 import java.util.concurrent.*
 
+//fun main() {
+//    // embeddedServer(CIO, port = 8080, host = "0.0.0.0", module = Application::module)
+//    //     .start(wait = true)
+//    embeddedServer(Netty, port = 8080, host = "0.0.0.0", module = Application::module)
+//        .start(wait = true)
+//}
+//
+//fun Application.module() {
 fun Application.main() {
     val customerStorage = mutableListOf<User>()
     customerStorage.addAll(
