@@ -19,13 +19,13 @@ import com.auth0.jwt.*
 import com.auth0.jwt.algorithms.*
 import io.ktor.server.auth.jwt.*
 import io.ktor.server.auth.*
-import tw.idv.neo.shared.data.User
+import tw.idv.neo.shared.data.vo.User
 
 import com.auth0.jwk.*
 import com.example.token.config.TokenConfig
-import io.ktor.server.engine.embeddedServer
-import io.ktor.server.netty.Netty
-import tw.idv.neo.shared.data.respond.AuthUser
+import tw.idv.neo.shared.data.dto.request.RegisterInfo
+import tw.idv.neo.shared.data.dto.respond.AccountInfo
+import tw.idv.neo.shared.data.dto.respond.ApiBaseItem
 import java.util.concurrent.*
 
 //fun main() {
@@ -40,8 +40,8 @@ fun Application.main() {
     val customerStorage = mutableListOf<User>()
     customerStorage.addAll(
         arrayOf(
-            User("Jane", "fake1"),
-            User("John", "fake2")
+            User(username ="Jane", password = "fake1"),
+            User(username ="John", password = "fake2")
         )
     )
 
@@ -97,28 +97,39 @@ fun Application.main() {
             val id = call.parameters["id"]
             val user = customerStorage.getOrNull(id!!.toInt())
             if (user == null) {
-                call.respond(HttpStatusCode.Conflict, "用户不存在")
+                val result=ApiBaseItem<User>(
+                    code=HttpStatusCode.Conflict.value,
+                    message = "用户不存在",
+                    data = user
+                )
+                call.respond(HttpStatusCode.OK, result)
                 return@get
             } else {
-                call.respond(
-                    HttpStatusCode.OK,
-                    message = AuthUser(
-                        username = user.username,
-                        token = "fewfewqfe"
-                    )
+                val result=ApiBaseItem<AccountInfo>(
+                    code=HttpStatusCode.OK.value,
+                    message = HttpStatusCode.OK.description,
+                    data = AccountInfo(username = user.username,
+                        token = "fewfewqfe")
                 )
+                call.respond(HttpStatusCode.OK, result)
             }
         }
 
         post("/register") {
-            val request = call.receiveNullable<tw.idv.neo.shared.data.request.AuthUser>() ?: kotlin.run {
+            val request = call.receiveNullable<RegisterInfo>() ?: kotlin.run {
                 call.respond(HttpStatusCode.BadRequest)
                 return@post
             }
 
-            val user =  User(request.username,request.password)
+            val user =  User(username = request.username, password = request.password)
             customerStorage.add(user)
-            call.respondText("User Customer stored correctly", status = HttpStatusCode.Created)
+            val result=ApiBaseItem<AccountInfo>(
+                code=HttpStatusCode.Created.value,
+                message = HttpStatusCode.Created.description,
+                data = AccountInfo(username = user.username,
+                    token = "bxvcbvcbcnv")
+            )
+            call.respond(HttpStatusCode.OK, result)
         }
 
         post("/login") {
