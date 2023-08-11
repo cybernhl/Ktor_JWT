@@ -50,7 +50,7 @@ class CustomerTests {
         }
         val response = client.post("/customer") {
             contentType(ContentType.Application.Json)
-            setBody(User(3, "Jet", "Brains"))
+            setBody(User( "Jet", "Brains"))
         }
         assertEquals("Customer stored correctly", response.bodyAsText())
         assertEquals(HttpStatusCode.Created, response.status)
