@@ -23,7 +23,7 @@ import tw.idv.neo.shared.data.vo.User
 
 import com.auth0.jwk.*
 import com.example.token.config.TokenConfig
-import io.ktor.client.request.setBody
+import tw.idv.neo.shared.data.dto.request.LoginInfo
 import tw.idv.neo.shared.data.dto.request.RegisterInfo
 import tw.idv.neo.shared.data.dto.respond.AccountInfo
 import tw.idv.neo.shared.data.dto.respond.ApiBaseItem
@@ -38,6 +38,7 @@ import java.util.concurrent.*
 //
 //fun Application.module() {
 fun Application.main() {
+
     val customerStorage = mutableListOf<User>()
     customerStorage.addAll(
         arrayOf(
@@ -50,6 +51,8 @@ fun Application.main() {
         json(Json {
             prettyPrint = true
             isLenient = true
+            //https://stackoverflow.com/questions/66742155/ignoreunknownkeys-for-one-type-only-with-kotlinx-and-ktor
+            ignoreUnknownKeys = true
         })
     }
     install(CORS) {
@@ -94,6 +97,78 @@ fun Application.main() {
         }
     }
     routing {
+       post("/register") {
+            //FIXME how check error input type "form-dat" "x-www-form-urlencoded" "json" ?
+            val request = call.receiveNullable<RegisterInfo>() ?: kotlin.run {
+                call.respond(HttpStatusCode.BadRequest)
+                return@post
+            }
+
+            val user = User(username = request.username, password = request.password)
+            customerStorage.add(user)
+            val result = ApiBaseItem<AccountInfo>(
+                code = HttpStatusCode.Created.value,
+                message = HttpStatusCode.Created.description,
+                data = AccountInfo(
+                    username = user.username,
+                    token = "bxvcbvcbcnv"
+                )
+            )
+            call.respond(HttpStatusCode.Created, result)
+        }
+
+        post("/login") {
+            //FIXME if input request not match Json key Encountered an unknown key !!
+            val request = call.receiveNullable<LoginInfo>() ?: kotlin.run {
+                call.respond(HttpStatusCode.BadRequest)
+                return@post
+            }
+            println("Show request $request")
+           customerStorage.find { it.username == request.username }?.let {
+               // Check username and password
+                  if (it.password==request.password){
+                      //TODO gen token
+                      //
+//            val publicKey = jwkProvider.get("6f8856ed-9189-488f-9011-0ff4b6c08edc").publicKey
+//            val keySpecPKCS8 = PKCS8EncodedKeySpec(Base64.getDecoder().decode(privateKeyString))
+//            val privateKey = KeyFactory.getInstance("RSA").generatePrivate(keySpecPKCS8)
+
+                      val token = JWT.create()
+                          .withAudience(tokenConfig.audience)
+                          .withIssuer(tokenConfig.issuer)
+                          .withClaim("username", request.username)
+                          .withExpiresAt(Date(System.currentTimeMillis() + tokenConfig.expiresIn))
+                          .sign(Algorithm.HMAC256(tokenConfig.secret))
+                      val result = ApiBaseItem<AccountInfo>(
+                          code = HttpStatusCode.Created.value,
+                          message = HttpStatusCode.Created.description,
+                          data = AccountInfo(
+                              username = request.username,
+                              token = token
+                          )
+                      )
+                      call.respond(HttpStatusCode.OK, result)
+                  }else{
+                      println("Show pass error")
+                      call.respond(HttpStatusCode.BadRequest)
+                      return@post
+                  }
+            } ?: run {
+               println("Show typo error or account not  error")
+               call.respond(HttpStatusCode.BadRequest)
+               return@post
+            }
+        }
+
+        authenticate("auth-jwt") {
+            get("/hello") {
+                val principal = call.principal<JWTPrincipal>()
+                val username = principal!!.payload.getClaim("username").asString()
+                val expiresAt = principal.expiresAt?.time?.minus(System.currentTimeMillis())
+                call.respondText("Hello, $username! Token is expired at $expiresAt ms.")
+            }
+        }
+
         //TODO TEST
         get("/json/kotlinx-serialization") {
             call.respond(mapOf("hello" to "world"))
@@ -122,54 +197,7 @@ fun Application.main() {
             }
         }
 
-        post("/register") {
-            //FIXME how check error input type "form-dat" "x-www-form-urlencoded" "json" ?
-            val request = call.receiveNullable<RegisterInfo>() ?: kotlin.run {
-                call.respond(HttpStatusCode.BadRequest)
-                return@post
-            }
-
-            val user = User(username = request.username, password = request.password)
-            customerStorage.add(user)
-            val result = ApiBaseItem<AccountInfo>(
-                code = HttpStatusCode.Created.value,
-                message = HttpStatusCode.Created.description,
-                data = AccountInfo(
-                    username = user.username,
-                    token = "bxvcbvcbcnv"
-                )
-            )
-            call.respond(HttpStatusCode.OK, result)
-        }
-
-        post("/login") {
-            val user = call.receive<User>()
-            // Check username and password
-            //
-//            val publicKey = jwkProvider.get("6f8856ed-9189-488f-9011-0ff4b6c08edc").publicKey
-//            val keySpecPKCS8 = PKCS8EncodedKeySpec(Base64.getDecoder().decode(privateKeyString))
-//            val privateKey = KeyFactory.getInstance("RSA").generatePrivate(keySpecPKCS8)
-
-            val token = JWT.create()
-                .withAudience(tokenConfig.audience)
-                .withIssuer(tokenConfig.issuer)
-                .withClaim("username", user.username)
-                .withExpiresAt(Date(System.currentTimeMillis() + tokenConfig.expiresIn))
-                .sign(Algorithm.HMAC256(tokenConfig.secret))
-            call.respond(hashMapOf("token" to token, "status" to HttpStatusCode.Created))
-        }
-
-        authenticate("auth-jwt") {
-            get("/hello") {
-                val principal = call.principal<JWTPrincipal>()
-                val username = principal!!.payload.getClaim("username").asString()
-                val expiresAt = principal.expiresAt?.time?.minus(System.currentTimeMillis())
-                call.respondText("Hello, $username! Token is expired at $expiresAt ms.")
-            }
-        }
-
         //swagger
-
         swaggerUI(path = "swagger", swaggerFile = "openapi/documentation.yaml") {
             version = "4.15.5"
         }
