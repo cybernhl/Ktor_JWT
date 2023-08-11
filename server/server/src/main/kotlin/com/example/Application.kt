@@ -41,8 +41,8 @@ fun Application.main() {
     val customerStorage = mutableListOf<User>()
     customerStorage.addAll(
         arrayOf(
-            User(username ="Jane", password = "fake1"),
-            User(username ="John", password = "fake2")
+            User(username = "Jane", password = "fake1"),
+            User(username = "John", password = "fake2")
         )
     )
 
@@ -94,23 +94,29 @@ fun Application.main() {
         }
     }
     routing {
+        //TODO TEST
+        get("/json/kotlinx-serialization") {
+            call.respond(mapOf("hello" to "world"))
+        }
         get("/user/{id}") {
             val id = call.parameters["id"]
             val user = customerStorage.getOrNull(id!!.toInt())
             if (user == null) {
-                val result=ApiBaseItem<User>(
-                    code=HttpStatusCode.Conflict.value,
+                val result = ApiBaseItem<User>(
+                    code = HttpStatusCode.Conflict.value,
                     message = "用户不存在",
                     data = user
                 )
                 call.respond(HttpStatusCode.OK, result)
                 return@get
             } else {
-                val result=ApiBaseItem<AccountInfo>(
-                    code=HttpStatusCode.OK.value,
+                val result = ApiBaseItem<AccountInfo>(
+                    code = HttpStatusCode.OK.value,
                     message = HttpStatusCode.OK.description,
-                    data = AccountInfo(username = user.username,
-                        token = "fewfewqfe")
+                    data = AccountInfo(
+                        username = user.username,
+                        token = "fewfewqfe"
+                    )
                 )
                 call.respond(HttpStatusCode.OK, result)
             }
@@ -123,13 +129,15 @@ fun Application.main() {
                 return@post
             }
 
-            val user =  User(username = request.username, password = request.password)
+            val user = User(username = request.username, password = request.password)
             customerStorage.add(user)
-            val result=ApiBaseItem<AccountInfo>(
-                code=HttpStatusCode.Created.value,
+            val result = ApiBaseItem<AccountInfo>(
+                code = HttpStatusCode.Created.value,
                 message = HttpStatusCode.Created.description,
-                data = AccountInfo(username = user.username,
-                    token = "bxvcbvcbcnv")
+                data = AccountInfo(
+                    username = user.username,
+                    token = "bxvcbvcbcnv"
+                )
             )
             call.respond(HttpStatusCode.OK, result)
         }
