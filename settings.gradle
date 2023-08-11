@@ -64,7 +64,7 @@ include ':shared'
 project(":shared").projectDir = file("./share/shared")
 include ':db'
 project(":db").projectDir = file("./share/db")
-include ':entity'
+include ':entity'//https://hackmd.io/@MonsterLee/HJyAdgRBB about vo/po/dto/dao/bo
 project(":entity").projectDir = file("./share/entity")
 ////client
 include ':app'
