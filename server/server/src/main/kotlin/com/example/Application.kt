@@ -23,6 +23,7 @@ import tw.idv.neo.shared.data.vo.User
 
 import com.auth0.jwk.*
 import com.example.token.config.TokenConfig
+import io.ktor.client.request.setBody
 import tw.idv.neo.shared.data.dto.request.RegisterInfo
 import tw.idv.neo.shared.data.dto.respond.AccountInfo
 import tw.idv.neo.shared.data.dto.respond.ApiBaseItem
@@ -116,6 +117,7 @@ fun Application.main() {
         }
 
         post("/register") {
+            //FIXME how check error input type "form-dat" "x-www-form-urlencoded" "json" ?
             val request = call.receiveNullable<RegisterInfo>() ?: kotlin.run {
                 call.respond(HttpStatusCode.BadRequest)
                 return@post
