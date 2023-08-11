@@ -7,7 +7,7 @@ import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.*
 import io.ktor.server.testing.*
 import org.junit.*
-import tw.idv.neo.shared.data.User
+import tw.idv.neo.shared.data.vo.User
 import java.io.*
 import kotlin.test.*
 import kotlin.test.Test
@@ -50,7 +50,7 @@ class CustomerTests {
         }
         val response = client.post("/customer") {
             contentType(ContentType.Application.Json)
-            setBody(User( "Jet", "Brains"))
+            setBody(User( username = "Jet", password = "Brains"))
         }
         assertEquals("Customer stored correctly", response.bodyAsText())
         assertEquals(HttpStatusCode.Created, response.status)
