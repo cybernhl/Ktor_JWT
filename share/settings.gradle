@@ -56,7 +56,6 @@ dependencyResolutionManagement {
 }
 
 rootProject.name = "Ktor_JWT_OpenAPI_Server"
-////server
-include ':server'
+include ':shared'
+include ':db'
 include ':entity'
-project(":entity").projectDir = file("../share/entity")
