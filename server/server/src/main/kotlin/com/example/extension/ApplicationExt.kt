@@ -3,6 +3,7 @@ package com.example.extension
 import com.auth0.jwt.JWT
 import com.auth0.jwt.algorithms.Algorithm
 import com.example.routing.APIByswaggerUI
+import com.example.routing.findUserById
 import com.example.routing.login
 import com.example.routing.openAPIPage
 import com.example.routing.register
@@ -31,6 +32,8 @@ fun Application.configureRouting(tokenConfig: TokenConfig) {
         }
         APIByswaggerUI()
         openAPIPage()
+        //TEST
+        findUserById()
     }
 }
 
