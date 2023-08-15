@@ -61,6 +61,13 @@ kotlin {
             dependencies {
                 implementation(libs.coroutines.core)
                 implementation(libs.sqlDelight.coroutinesExt)
+                
+                implementation(libs.kotlin.serialization)
+                implementation("io.ktor:ktor-serialization-kotlinx-json:2.3.3")
+
+
+
+
                 api(libs.kotlinx.datetime)
                 api(libs.napier)
                 api(libs.mokoResources)

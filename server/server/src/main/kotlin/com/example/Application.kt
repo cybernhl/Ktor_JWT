@@ -9,8 +9,8 @@ import com.example.extension.CorsEnv
 import com.example.extension.JsonSerializationEnv
 import com.example.extension.SecurityAuthenticationJWTEnv
 import com.example.extension.configureRouting
-import com.example.routing.customerStorage
 import com.example.token.config.TokenConfig
+import tw.idv.neo.shared.db.Repository
 import java.util.concurrent.*
 
 //fun main() {
@@ -22,10 +22,12 @@ import java.util.concurrent.*
 //
 //fun Application.module() {
 fun Application.main() {
+    val customerStorage =Repository.customerStorage
+    //gen fake data
    customerStorage.addAll(
         arrayOf(
-            User(username = "Jane", password = "fake1"),
-            User(username = "John", password = "fake2")
+            tw.idv.neo.shared.db.User(username = "Jane", password = "fake1"),
+            tw.idv.neo.shared.db.User(username = "John", password = "fake2")
         )
     )
 

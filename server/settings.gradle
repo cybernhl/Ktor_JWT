@@ -60,3 +60,5 @@ rootProject.name = "ShareResources"
 include ':server'
 include ':entity'
 project(":entity").projectDir = file("../share/entity")
+include ':db'
+project(":db").projectDir = file("../share/db")
