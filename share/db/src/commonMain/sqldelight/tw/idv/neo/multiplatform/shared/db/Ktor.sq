@@ -1,30 +1,39 @@
 import kotlinx.datetime.LocalDateTime;
+import kotlin.Int;
 
-CREATE TABLE note (
-    id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
-    title TEXT NOT NULL,
-    text TEXT NOT NULL,
-    dateCreated INTEGER AS LocalDateTime NOT NULL,
-    dateModified INTEGER AS LocalDateTime NOT NULL
+CREATE TABLE User (
+    id INTEGER  AS Int NOT NULL PRIMARY KEY AUTOINCREMENT,-- index
+    userid TEXT NOT NULL,-- UUID of the user
+    name TEXT NOT NULL,--Username
+    password TEXT NOT NULL,--password
+    device_id TEXT NOT NULL, --user binding device,
+    token TEXT NOT NULL, --user token,
+    dateCreated INTEGER AS LocalDateTime NOT NULL
 );
 
-getAll:
-SELECT * FROM note ORDER BY dateModified DESC;
+getAllUsers:
+SELECT * FROM User ORDER BY dateCreated DESC;
 
-getById:
-SELECT * FROM note WHERE id = :noteId;
+getUserByIndex:
+SELECT * FROM User WHERE id = ?;
 
-insert:
-INSERT INTO note VALUES ?;
+findUserByName:
+SELECT * FROM User WHERE name = ?;
 
-lastInsertRowId:
-SELECT last_insert_rowid();
+findUserByBindDeviceId:
+SELECT * FROM User WHERE device_id = ?;
+
+findUserBytoken:
+SELECT * FROM User WHERE token = ?;
+
+insertUser:
+INSERT INTO User VALUES ?;
 
 update:
-INSERT OR REPLACE INTO note VALUES ?;
+INSERT OR REPLACE INTO User VALUES ?;
 
-delete:
-DELETE FROM note WHERE id = :noteId;
+deleteUser:
+DELETE FROM User WHERE id = ?;
 
-deleteAll:
-DELETE FROM note;
+deleteAlluser:
+DELETE FROM User;

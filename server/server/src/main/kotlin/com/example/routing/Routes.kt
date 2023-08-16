@@ -16,14 +16,14 @@ import io.ktor.server.routing.Route
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.swagger.codegen.v3.generators.html.StaticHtmlCodegen
+import kotlinx.datetime.LocalDateTime
 import tw.idv.neo.shared.data.dto.request.LoginInfo
 import tw.idv.neo.shared.data.dto.request.RegisterInfo
 import tw.idv.neo.shared.data.dto.respond.AccountInfo
 import tw.idv.neo.shared.data.dto.respond.ApiBaseItem
-import tw.idv.neo.shared.data.vo.User
-import tw.idv.neo.shared.db.Repository
-import tw.idv.neo.shared.db.Repository.customerStorage
+import tw.idv.neo.shared.db.DatabaseRepo
 import java.util.Date
+import tw.idv.neo.multiplatform.shared.db.User
 
 fun Route.signIn(tokenConfig: TokenConfig) {
     post("/signIn") {
@@ -38,7 +38,7 @@ fun Route.signIn(tokenConfig: TokenConfig) {
             )
             return@post
         }
-        Repository.customerStorage.find { it.username == request.username }?.let {
+        DatabaseRepo.customerStorage.find { it.name == request.username }?.let {
             // Check username and password
             if (it.password == request.password) {
                 //TODO gen token
@@ -91,7 +91,7 @@ fun Route.login(tokenConfig: TokenConfig) {
             )
             return@post
         }
-        Repository.customerStorage.find { it.username == request.username }?.let {
+        DatabaseRepo.customerStorage.find { it.name == request.username }?.let {
             // Check username and password
             if (it.password == request.password) {
                 val result = ApiBaseItem<AccountInfo>(
@@ -139,20 +139,23 @@ fun Route.signUp(tokenConfig: TokenConfig) {
             .withClaim("username", request.username)
             .withExpiresAt(Date(System.currentTimeMillis() + tokenConfig.expiresIn))
             .sign(Algorithm.HMAC256(tokenConfig.secret))
-        val user_id = customerStorage.size + 1
-        val user = tw.idv.neo.shared.db.User(
-            userId = user_id,
-            username = request.username,
+        val user_id = DatabaseRepo.customerStorage.size + 1
+        val user =  User(
+            id=user_id,
+            userid = user_id.toString(),
+            name = request.username,
             password = request.password,
-            token = token
+            token = token,
+            device_id="efwe",
+            dateCreated = LocalDateTime(2018, 1, 4, 3, 4)
         )
-        customerStorage.add(user)
+        DatabaseRepo.customerStorage.add(user)
 
         val result = ApiBaseItem<AccountInfo>(
             code = HttpStatusCode.Created.value,
             message = HttpStatusCode.Created.description,
             data = AccountInfo(
-                username = user.username,
+                username = user.name,
                 token = token
             )
         )
@@ -173,20 +176,23 @@ fun Route.register(tokenConfig: TokenConfig) {
             .withClaim("username", request.username)
             .withExpiresAt(Date(System.currentTimeMillis() + tokenConfig.expiresIn))
             .sign(Algorithm.HMAC256(tokenConfig.secret))
-        val user_id = customerStorage.size + 1
-        val user = tw.idv.neo.shared.db.User(
-            userId = user_id,
-            username = request.username,
+        val user_id = DatabaseRepo.customerStorage.size + 1
+        val user =  User(
+            id=user_id,
+            userid = user_id.toString(),
+            name = request.username,
             password = request.password,
-            token = token
+            token = token,
+            device_id="efwe",
+            dateCreated = LocalDateTime(2018, 1, 4, 3, 4)
         )
-        customerStorage.add(user)
+        DatabaseRepo.customerStorage.add(user)
 
         val result = ApiBaseItem<AccountInfo>(
             code = HttpStatusCode.Created.value,
             message = HttpStatusCode.Created.description,
             data = AccountInfo(
-                username = user.username,
+                username = user.name,
                 token = token
             )
         )
@@ -237,7 +243,7 @@ fun Route.jsonSerialization() {
 fun Route.findUserById() {
     get("/user/{id}") {
         val id = call.parameters["id"]
-        val user = customerStorage.getOrNull(id!!.toInt())
+        val user = DatabaseRepo.customerStorage.getOrNull(id!!.toInt())
         if (user == null) {
             val result = ApiBaseItem<User>(
                 code = HttpStatusCode.Conflict.value,
@@ -251,7 +257,7 @@ fun Route.findUserById() {
                 code = HttpStatusCode.OK.value,
                 message = HttpStatusCode.OK.description,
                 data = AccountInfo(
-                    username = user.username,
+                    username = user.name,
                     token = "fewfewqfe"
                 )
             )
