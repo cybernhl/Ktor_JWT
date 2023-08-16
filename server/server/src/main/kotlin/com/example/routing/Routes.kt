@@ -258,7 +258,7 @@ fun Route.findUserById() {
                 message = HttpStatusCode.OK.description,
                 data = AccountInfo(
                     username = user.name,
-                    token = "fewfewqfe"
+                    token = user.token
                 )
             )
             call.respond(HttpStatusCode.OK, result)
