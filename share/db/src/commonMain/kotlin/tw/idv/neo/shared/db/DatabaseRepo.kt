@@ -9,9 +9,8 @@ abstract class DatabaseRepo {
 
         fun copyCharArray(input: CharArray): CharArray = CharArray(input.size, input::get)
     }
+    abstract fun buildDatabaseInstanceIfNeed(passphrase: CharSequence = ""): DatabaseHolder
      //temp storage will replace to Database
     abstract val dbQueries: KtorQueries
     abstract fun closeDatabase()
-
-
 }

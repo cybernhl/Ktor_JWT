@@ -166,6 +166,7 @@ fun Route.signUp(tokenConfig: TokenConfig) {
 fun Route.register(tokenConfig: TokenConfig) {
     post("/register") {
         //FIXME how check error input type "form-dat" "x-www-form-urlencoded" "json" ?
+        //FIXME check User exists ?
         val request = call.receiveNullable<RegisterInfo>() ?: kotlin.run {
             call.respond(HttpStatusCode.BadRequest)
             return@post
