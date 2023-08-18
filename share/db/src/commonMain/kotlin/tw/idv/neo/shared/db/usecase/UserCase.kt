@@ -18,7 +18,9 @@ class UserCase(private val dbRepo: DatabaseRepo) {
         queries.getAllUsers().asFlow().mapToList(Dispatchers.IO).distinctUntilChanged()
 
     //FIXME merge to  "kotlin find with filter"
+
     fun findUserByIndex(index: Int): Flow<User> =
+//        queries.getUserByIndex(index).executeAsOneOrNull()
         queries.getUserByIndex(index).asFlow().mapToOne(Dispatchers.IO).distinctUntilChanged()
 
     fun findUserByName(name: String): Flow<User> =

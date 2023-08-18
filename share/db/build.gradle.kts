@@ -125,6 +125,7 @@ kotlin {
             dependsOn(commonMain)
             dependencies {
                 implementation(libs.sqlDelight.jvm)
+                implementation(libs.sqlDelight.coroutinesJvmExt)
             }
         }
         val jvmTest by getting {

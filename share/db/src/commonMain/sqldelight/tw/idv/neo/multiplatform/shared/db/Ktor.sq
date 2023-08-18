@@ -27,7 +27,9 @@ findUserBytoken:
 SELECT * FROM User WHERE token = ?;
 
 insertUser:
-INSERT INTO User VALUES ?;
+INSERT OR REPLACE
+INTO User ( userid,name ,password,device_id,token,dateCreated) VALUES ( ?,?,?,?,?,?  );
+-- INSERT INTO User VALUES ?;//here must set  id !!
 
 update:
 INSERT OR REPLACE INTO User VALUES ?;

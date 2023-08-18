@@ -13,7 +13,33 @@ import io.ktor.server.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.server.plugins.cors.routing.CORS
 import kotlinx.serialization.json.Json
 import io.ktor.server.auth.*
+import io.ktor.server.plugins.callloging.CallLogging
+import io.ktor.server.request.path
 import io.ktor.server.sessions.*
+import org.slf4j.event.Level
+import io.ktor.http.*
+import io.ktor.server.engine.*
+import io.ktor.server.netty.*
+import io.ktor.server.plugins.compression.Compression
+import io.ktor.server.plugins.compression.deflate
+import io.ktor.server.plugins.compression.gzip
+import io.ktor.server.plugins.compression.minimumSize
+import io.ktor.server.plugins.defaultheaders.DefaultHeaders
+import io.ktor.websocket.*
+import java.util.*
+
+fun Application.HeadersEnv() {
+    install(DefaultHeaders) {
+        header("X-Developer", "Baeldung")
+    }
+}
+fun Application.CallLogMonitoringEnv() {
+    install(CallLogging) {
+        level = Level.INFO
+//                filter { call -> call.request.path().startsWith("/author") }
+//                filter { call -> call.request.path().startsWith("/registerToken") }
+    }
+}
 
 fun Application.JsonSerializationEnv() {
     install(ContentNegotiation) {
@@ -38,9 +64,24 @@ fun Application.CorsEnv() {
     }
 }
 
-//fun Application.CompressionEnv() {
-//    gzip()
-//}
+fun Application.CompressionEnv() {
+    install(Compression){
+        gzip()
+//        gzip {
+//            matchContentType(
+//                ContentType.Application.JavaScript
+//            )
+//            condition {
+//                request.uri == "/orders"
+//                request.headers[HttpHeaders.Referrer]?.startsWith("https://my.domain/") == true
+//            }
+//        }
+        deflate {
+            priority = 1.0
+            minimumSize(1024)
+        }
+    }
+}
 
 
 //Ref : https://github.com/anuj72/KtorServiceStarter/blob/master/src/main/kotlin/com/example/plugins/Security.kt

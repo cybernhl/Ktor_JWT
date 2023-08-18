@@ -4,6 +4,7 @@ import io.ktor.server.application.*
 import com.auth0.jwt.*
 import com.auth0.jwt.algorithms.*
 import com.auth0.jwk.*
+import com.example.extension.CallLogMonitoringEnv
 import com.example.extension.CorsEnv
 import com.example.extension.JsonSerializationEnv
 import com.example.extension.SecurityAuthenticationJWTEnv
@@ -30,7 +31,7 @@ fun Application.main() {
             tw.idv.neo.multiplatform.shared.db.User(id=1,userid="vczxvxc",name = "DDD", password = "fake2", device_id = "sdaafsdffsd",token="wefwegfdgsfdg", dateCreated =LocalDateTime(2018, 1, 4, 3, 4))  ,
         )
     )
-
+    CallLogMonitoringEnv()
     JsonSerializationEnv()
     CorsEnv()
 //    val privateKeyString = environment.config.property("jwt.privateKey").getString()
