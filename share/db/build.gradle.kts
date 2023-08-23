@@ -125,7 +125,8 @@ kotlin {
             dependsOn(commonMain)
             dependencies {
                 implementation(libs.sqlDelight.jvm)
-                implementation(libs.sqlDelight.coroutinesJvmExt)
+                //Unresolved reference: coroutinesJvmExt SQLDelight Gradle plugin was applied but there are no databases set up.
+//                implementation(libs.sqlDelight.coroutinesJvmExt)
             }
         }
         val jvmTest by getting {
