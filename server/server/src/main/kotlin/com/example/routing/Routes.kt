@@ -2,7 +2,9 @@ package com.example.routing
 
 import com.auth0.jwt.JWT
 import com.auth0.jwt.algorithms.Algorithm
+import com.example.token.claim.TokenClaim
 import com.example.token.config.TokenConfig
+import com.example.token.service.JwtTokenService
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.call
 import io.ktor.server.auth.jwt.JWTPrincipal
@@ -25,6 +27,7 @@ import tw.idv.neo.shared.db.DatabaseRepo
 import java.util.Date
 import tw.idv.neo.multiplatform.shared.db.User
 
+val tokenService = JwtTokenService()
 fun Route.signIn(tokenConfig: TokenConfig) {
     post("/signIn") {
         //FIXME if input request not match Json key Encountered an unknown key !!
@@ -42,6 +45,21 @@ fun Route.signIn(tokenConfig: TokenConfig) {
             // Check username and password
             if (it.password == request.password) {
                 //TODO gen token
+                if (!it.token.isNullOrBlank()){
+                    val claims = listOf(
+                        TokenClaim("username", request.username),
+                    )
+                    var prepare_token = JWT.create()
+                        .withAudience(tokenConfig.audience)
+                        .withIssuer(tokenConfig.issuer)
+                        .withExpiresAt(Date(System.currentTimeMillis() + tokenConfig.expiresIn))
+                    claims.forEach {
+                        prepare_token = prepare_token.withClaim(it.key, it.value)
+                    }
+                    val token = prepare_token.sign(Algorithm.HMAC256(tokenConfig.secret))
+                    //FIXME
+                    it.copy(token=token)
+                }
                 //
 //            val publicKey = jwkProvider.get("6f8856ed-9189-488f-9011-0ff4b6c08edc").publicKey
 //            val keySpecPKCS8 = PKCS8EncodedKeySpec(Base64.getDecoder().decode(privateKeyString))
@@ -94,6 +112,21 @@ fun Route.login(tokenConfig: TokenConfig) {
         DatabaseRepo.customerStorage.find { it.name == request.username }?.let {
             // Check username and password
             if (it.password == request.password) {
+                if (!it.token.isNullOrBlank()){
+                    val claims = listOf(
+                        TokenClaim("username", request.username),
+                    )
+                    var prepare_token = JWT.create()
+                        .withAudience(tokenConfig.audience)
+                        .withIssuer(tokenConfig.issuer)
+                        .withExpiresAt(Date(System.currentTimeMillis() + tokenConfig.expiresIn))
+                    claims.forEach {
+                        prepare_token = prepare_token.withClaim(it.key, it.value)
+                    }
+                    val token = prepare_token.sign(Algorithm.HMAC256(tokenConfig.secret))
+                    //FIXME
+                    it.copy(token=token)
+                }
                 val result = ApiBaseItem<AccountInfo>(
                     code = HttpStatusCode.OK.value,
                     message = HttpStatusCode.OK.description,
@@ -133,12 +166,18 @@ fun Route.signUp(tokenConfig: TokenConfig) {
             call.respond(HttpStatusCode.BadRequest)
             return@post
         }
-        val token = JWT.create()
+        val claims = listOf(
+            TokenClaim("username", request.username),
+        )
+        var prepare_token = JWT.create()
             .withAudience(tokenConfig.audience)
             .withIssuer(tokenConfig.issuer)
-            .withClaim("username", request.username)
             .withExpiresAt(Date(System.currentTimeMillis() + tokenConfig.expiresIn))
-            .sign(Algorithm.HMAC256(tokenConfig.secret))
+        claims.forEach {
+            prepare_token = prepare_token.withClaim(it.key, it.value)
+        }
+        val token = prepare_token.sign(Algorithm.HMAC256(tokenConfig.secret))
+
         val user_id = DatabaseRepo.customerStorage.size + 1
         val user =  User(
             id=user_id,
@@ -171,12 +210,17 @@ fun Route.register(tokenConfig: TokenConfig) {
             call.respond(HttpStatusCode.BadRequest)
             return@post
         }
-        val token = JWT.create()
+        val claims = listOf(
+            TokenClaim("username", request.username),
+        )
+        var prepare_token = JWT.create()
             .withAudience(tokenConfig.audience)
             .withIssuer(tokenConfig.issuer)
-            .withClaim("username", request.username)
             .withExpiresAt(Date(System.currentTimeMillis() + tokenConfig.expiresIn))
-            .sign(Algorithm.HMAC256(tokenConfig.secret))
+        claims.forEach {
+            prepare_token = prepare_token.withClaim(it.key, it.value)
+        }
+        val token = prepare_token.sign(Algorithm.HMAC256(tokenConfig.secret))
         val user_id = DatabaseRepo.customerStorage.size + 1
         val user =  User(
             id=user_id,
