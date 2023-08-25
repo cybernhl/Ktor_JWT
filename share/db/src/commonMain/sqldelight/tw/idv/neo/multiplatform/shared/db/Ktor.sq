@@ -26,10 +26,12 @@ SELECT * FROM User WHERE device_id = ?;
 findUserBytoken:
 SELECT * FROM User WHERE token = ?;
 
-insertUser:
-INSERT OR REPLACE
-INTO User ( userid,name ,password,device_id,token,dateCreated) VALUES ( ?,?,?,?,?,?  );
--- INSERT INTO User VALUES ?;//here must set  id !!
+-- Ref : https://github.com/cashapp/sqldelight/issues/1482
+-- Ref : https://github.com/cashapp/sqldelight/issues/4508#issuecomment-1672976163
+insertUser{
+ INSERT OR REPLACE INTO User ( userid,name ,password,device_id,token,dateCreated) VALUES ( ?,?,?,?,?,?  );
+ SELECT last_insert_rowid();
+}
 
 update:
 INSERT OR REPLACE INTO User VALUES ?;
