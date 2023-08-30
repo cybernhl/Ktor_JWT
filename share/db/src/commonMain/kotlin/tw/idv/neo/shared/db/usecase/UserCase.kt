@@ -7,8 +7,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.mapLatest
-import kotlinx.datetime.LocalDateTime
 import tw.idv.neo.multiplatform.shared.db.User
 import tw.idv.neo.shared.db.DatabaseRepo
 import tw.idv.neo.shared.db.createLocalDateTime
@@ -38,13 +36,12 @@ class UserCase(private val dbRepo: DatabaseRepo) {
         queries.findUserByName(deviceid).asFlow().mapToOne(Dispatchers.IO).distinctUntilChanged()
 
     @Throws(Exception::class)
-    suspend fun createNote( userid: String, name: String, password: String, device_id: String, token: String  ): Long {
+    suspend fun insertUser(userid: String, name: String, password: String, device_id: String, token: String): Long {
         try {
             val localDateTime = createLocalDateTime()
-            return queries.insertUser(userid, name,password,device_id,token,localDateTime).executeAsOne()
+            return queries.insertUser(userid, name, password, device_id, token, localDateTime) .executeAsOne()
         } catch (cause: Throwable) {
             throw RuntimeException("Error : create user ", cause)
         }
     }
-
 }

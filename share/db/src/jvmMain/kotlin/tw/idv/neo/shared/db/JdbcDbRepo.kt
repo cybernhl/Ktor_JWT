@@ -9,7 +9,6 @@ class JdbcDbRepo : DatabaseRepo() {
     override val dbQueries: KtorQueries
         get() = databaseHolder?.dbQueries ?: throw PlatformSQLiteThrowable("DB is null")
 
-
     override fun buildDatabaseInstanceIfNeed(
         passphrase: CharSequence
     ): DatabaseHolder = synchronized(this) {

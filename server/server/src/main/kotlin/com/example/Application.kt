@@ -44,14 +44,14 @@ fun Application.main() {
     )
     SecurityAuthenticationJWTEnv(tokenConfig)
 
-    val jwkProvider = JwkProviderBuilder(tokenConfig.issuer)
-        .cached(10, 24, TimeUnit.HOURS)
-        .rateLimited(10, 1, TimeUnit.MINUTES)
-        .build()
-    val jwtverifier = JWT
-        .require(Algorithm.HMAC256(tokenConfig.secret))
-        .withAudience(tokenConfig.audience)
-        .withIssuer(tokenConfig.issuer)
+//    val jwkProvider = JwkProviderBuilder(tokenConfig.issuer)
+//        .cached(10, 24, TimeUnit.HOURS)
+//        .rateLimited(10, 1, TimeUnit.MINUTES)
+//        .build()
+//    val jwtverifier = JWT
+//        .require(Algorithm.HMAC256(tokenConfig.secret))
+//        .withAudience(tokenConfig.audience)
+//        .withIssuer(tokenConfig.issuer)
 
     configureRouting(tokenConfig)
 }

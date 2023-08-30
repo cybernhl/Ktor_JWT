@@ -26,11 +26,23 @@ import tw.idv.neo.shared.data.dto.respond.ApiBaseItem
 import tw.idv.neo.shared.db.DatabaseRepo
 import java.util.Date
 import tw.idv.neo.multiplatform.shared.db.User
+import tw.idv.neo.shared.db.JdbcDbRepo
+import tw.idv.neo.shared.db.usecase.UserCase
 
 val tokenService = JwtTokenService()
+private val dbRepo=JdbcDbRepo()//can use di !!
+private val dbHolder=dbRepo.buildDatabaseInstanceIfNeed()
+
+private val useCase = UserCase(dbRepo)
+
+//val noteDb = dbRepo.buildDatabaseInstanceIfNeed().noteDb
+//noteDb.noteQueries.transaction {
+//    notes.forEach(noteDb.noteQueries::insert)
+//}
 fun Route.signIn(tokenConfig: TokenConfig) {
     post("/signIn") {
         //FIXME if input request not match Json key Encountered an unknown key !!
+
         val request = call.receiveNullable<LoginInfo>() ?: kotlin.run {
             call.respond(
                 HttpStatusCode.OK, ApiBaseItem<AccountInfo>(
@@ -189,6 +201,26 @@ fun Route.signUp(tokenConfig: TokenConfig) {
             dateCreated = LocalDateTime(2018, 1, 4, 3, 4)
         )
         DatabaseRepo.customerStorage.add(user)
+//        useCase.getAllUsers().collectLatest { its->
+//            its.forEach {
+//                println("Show all users it : $it")
+//            }
+//        }
+
+
+            val db_result=useCase.insertUser(userid =user_id.toString(),name =request.username,password = request.password,token=token, device_id="efwe")
+            println("Show db_result $db_result")
+
+
+
+////        val respond=async {
+//            useCase.getAllUsers().collectLatest { its ->
+//                its.forEach {
+//                    println("Show after all users it : $it")
+//                }
+//            }
+////        }
+//        respond.await().
 
         val result = ApiBaseItem<AccountInfo>(
             code = HttpStatusCode.Created.value,
