@@ -18,6 +18,9 @@ import io.ktor.server.routing.Route
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.swagger.codegen.v3.generators.html.StaticHtmlCodegen
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.withContext
 import kotlinx.datetime.LocalDateTime
 import tw.idv.neo.shared.data.dto.request.LoginInfo
 import tw.idv.neo.shared.data.dto.request.RegisterInfo
@@ -210,7 +213,13 @@ fun Route.signUp(tokenConfig: TokenConfig) {
 
             val db_result=useCase.insertUser(userid =user_id.toString(),name =request.username,password = request.password,token=token, device_id="efwe")
             println("Show db_result $db_result")
-
+//            withContext(Dispatchers.IO){
+//                useCase.getAllUsers().collectLatest { its ->
+//                    its.forEach {
+//                        println("Show after all users it : $it")
+//                    }
+//                }
+//            }
 
 
 ////        val respond=async {
