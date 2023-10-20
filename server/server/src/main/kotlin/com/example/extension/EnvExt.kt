@@ -49,6 +49,10 @@ fun Application.JsonSerializationEnv() {
             //https://stackoverflow.com/questions/66742155/ignoreunknownkeys-for-one-type-only-with-kotlinx-and-ktor
             ignoreUnknownKeys = true
         })
+        //TODO use register to add CustomConverter
+        //https://stackoverflow.com/questions/69669425/custom-multipart-form-data-serializable-in-kotlin-ktor
+        //https://github.com/ktorio/ktor/blob/c96b3e14c0fcea51490200ee726628f06aa89800/ktor-features/ktor-serialization/jvm/src/io/ktor/serialization/SerializationConverter.kt#L58
+//        register(ContentType.Application.FormUrlEncoded, FormUrlEncodedConverter())
     }
 }
 fun Application.CorsEnv() {
