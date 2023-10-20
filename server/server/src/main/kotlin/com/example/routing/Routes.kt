@@ -12,6 +12,7 @@ import io.ktor.server.auth.principal
 import io.ktor.server.plugins.openapi.openAPI
 import io.ktor.server.plugins.swagger.swaggerUI
 import io.ktor.server.request.receiveNullable
+import io.ktor.server.request.receiveParameters
 import io.ktor.server.response.respond
 import io.ktor.server.response.respondText
 import io.ktor.server.routing.Route
@@ -19,7 +20,9 @@ import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.swagger.codegen.v3.generators.html.StaticHtmlCodegen
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.datetime.LocalDateTime
 import tw.idv.neo.shared.data.dto.request.LoginInfo
@@ -33,8 +36,8 @@ import tw.idv.neo.shared.db.JdbcDbRepo
 import tw.idv.neo.shared.db.usecase.UserCase
 
 val tokenService = JwtTokenService()
-private val dbRepo=JdbcDbRepo()//can use di !!
-private val dbHolder=dbRepo.buildDatabaseInstanceIfNeed()
+private val dbRepo = JdbcDbRepo()//can use di !!
+private val dbHolder = dbRepo.buildDatabaseInstanceIfNeed()
 
 private val useCase = UserCase(dbRepo)
 
@@ -60,7 +63,7 @@ fun Route.signIn(tokenConfig: TokenConfig) {
             // Check username and password
             if (it.password == request.password) {
                 //TODO gen token
-                if (!it.token.isNullOrBlank()){
+                if (!it.token.isNullOrBlank()) {
                     val claims = listOf(
                         TokenClaim("username", request.username),
                     )
@@ -73,7 +76,7 @@ fun Route.signIn(tokenConfig: TokenConfig) {
                     }
                     val token = prepare_token.sign(Algorithm.HMAC256(tokenConfig.secret))
                     //FIXME
-                    it.copy(token=token)
+                    it.copy(token = token)
                 }
                 //
 //            val publicKey = jwkProvider.get("6f8856ed-9189-488f-9011-0ff4b6c08edc").publicKey
@@ -127,7 +130,7 @@ fun Route.login(tokenConfig: TokenConfig) {
         DatabaseRepo.customerStorage.find { it.name == request.username }?.let {
             // Check username and password
             if (it.password == request.password) {
-                if (!it.token.isNullOrBlank()){
+                if (!it.token.isNullOrBlank()) {
                     val claims = listOf(
                         TokenClaim("username", request.username),
                     )
@@ -140,7 +143,7 @@ fun Route.login(tokenConfig: TokenConfig) {
                     }
                     val token = prepare_token.sign(Algorithm.HMAC256(tokenConfig.secret))
                     //FIXME
-                    it.copy(token=token)
+                    it.copy(token = token)
                 }
                 val result = ApiBaseItem<AccountInfo>(
                     code = HttpStatusCode.OK.value,
@@ -176,7 +179,9 @@ fun Route.login(tokenConfig: TokenConfig) {
 
 fun Route.signUp(tokenConfig: TokenConfig) {
     post("/signUp") {
-        //FIXME how check error input type "form-dat" "x-www-form-urlencoded" "json" ?
+        //FIXME how check error input type "form-data" "x-www-form-urlencoded" "json" ?
+//        val receiveParameters= call.receiveParameters()
+//            println("Show get Request  ${receiveParameters}")
         val request = call.receiveNullable<RegisterInfo>() ?: kotlin.run {
             call.respond(HttpStatusCode.BadRequest)
             return@post
@@ -192,53 +197,111 @@ fun Route.signUp(tokenConfig: TokenConfig) {
             prepare_token = prepare_token.withClaim(it.key, it.value)
         }
         val token = prepare_token.sign(Algorithm.HMAC256(tokenConfig.secret))
+        //FIXME customerStorage is fake db !! use Arraylist  , real is  useCase &  dbRepo
+        var user_id = DatabaseRepo.customerStorage.size + 1
+////        val user =  User(
+//            id=user_id,
+//            userid = user_id.toString(),
+//            name = request.username,
+//            password = request.password,
+//            token = token,
+//            device_id="efwe",
+//            dateCreated = LocalDateTime(2018, 1, 4, 3, 4)
+//        )
+////        DatabaseRepo.customerStorage.add(user)
 
-        val user_id = DatabaseRepo.customerStorage.size + 1
-        val user =  User(
-            id=user_id,
-            userid = user_id.toString(),
-            name = request.username,
-            password = request.password,
-            token = token,
-            device_id="efwe",
-            dateCreated = LocalDateTime(2018, 1, 4, 3, 4)
-        )
-        DatabaseRepo.customerStorage.add(user)
-//        useCase.getAllUsers().collectLatest { its->
-//            its.forEach {
-//                println("Show all users it : $it")
+//        launch {
+//            useCase.getAllUsers().collectLatest { its ->
+//                its.forEach {
+//                    println("Show all users it : $it")
+//                }
 //            }
 //        }
 
-
-            val db_result=useCase.insertUser(userid =user_id.toString(),name =request.username,password = request.password,token=token, device_id="efwe")
-            println("Show db_result $db_result")
-//            withContext(Dispatchers.IO){
-//                useCase.getAllUsers().collectLatest { its ->
-//                    its.forEach {
-//                        println("Show after all users it : $it")
-//                    }
-//                }
-//            }
-
-
-////        val respond=async {
-//            useCase.getAllUsers().collectLatest { its ->
-//                its.forEach {
-//                    println("Show after all users it : $it")
-//                }
-//            }
-////        }
-//        respond.await().
-
-        val result = ApiBaseItem<AccountInfo>(
+        var result = ApiBaseItem<AccountInfo>(
             code = HttpStatusCode.Created.value,
             message = HttpStatusCode.Created.description,
             data = AccountInfo(
-                username = user.name,
+                username = request.username,
                 token = token
             )
         )
+        println("Show default result  $result")
+        launch {//FIXME　 launch not work !!
+            val usersAndInsertResult = async {
+                val allUsers = useCase.getAllUsers().collect {
+                    val insertResult = useCase.insertUser(
+                        userid = (it.size + 1).toString(),
+                        name = request.username,
+                        password = request.password,
+                        token = token,
+                        device_id = "efwe"
+                    )
+                    insertResult
+                }
+            }
+            val rrttt = usersAndInsertResult.await()
+            println("Show db Insert Result $rrttt")
+            println("Show default result @launch $result")
+
+            //FIXME　 user_id　must from useCase.getAllUsers() result size +1
+            val db_result = useCase.insertUser(
+                userid = user_id.toString(),
+                name = request.username,
+                password = request.password,
+                token = token,
+                device_id = "efwe"
+            )
+            // FIXME respond by db_result
+            // if  db_result ==1   is insert succeed result data is AccountInfo  or data is null
+            println("Show insert User into db  result $db_result")
+            if (db_result == 0L) {
+                result = ApiBaseItem<AccountInfo>(
+                    code = HttpStatusCode.Created.value,
+                    message = HttpStatusCode.Created.description,
+                    data = null
+                )
+            } else {
+                result = ApiBaseItem<AccountInfo>(
+                    code = HttpStatusCode.Created.value,
+                    message = HttpStatusCode.Created.description,
+                    data = AccountInfo(
+                        username = request.username,
+                        token = token
+                    )
+                )
+            }
+            println("Show  final  result @launch  $result")
+//        call.respond(HttpStatusCode.Created, result) //FIXME　if here   "call.respond" get "  404 Not Found: POST - /signUp"
+        }
+        val db_result = useCase.insertUser(
+            userid = user_id.toString(),//FIXME user_id　must from useCase.getAllUsers() result size +1
+            name = request.username,
+            password = request.password,
+            token = token,
+            device_id = "efwe"
+        )
+        // FIXME respond by db_result
+        // if  db_result ==1   is insert succeed result data is AccountInfo  or data is null
+        println("Show insert User into db  result $db_result")
+        if (db_result == 0L) {// insert  fail
+            result = ApiBaseItem<AccountInfo>(
+                code = HttpStatusCode.Created.value,
+                message = HttpStatusCode.Created.description,
+                data = null
+            )
+        } else {
+            result = ApiBaseItem<AccountInfo>(
+                code = HttpStatusCode.Created.value,
+                message = HttpStatusCode.Created.description,
+                data = AccountInfo(
+                    username = request.username,
+                    token = token
+                )
+            )
+        }
+        // FIXME respond result wait db_result -- insert User into db
+        println("Show  final  result   $result")
         call.respond(HttpStatusCode.Created, result)
     }
 }
@@ -263,13 +326,13 @@ fun Route.register(tokenConfig: TokenConfig) {
         }
         val token = prepare_token.sign(Algorithm.HMAC256(tokenConfig.secret))
         val user_id = DatabaseRepo.customerStorage.size + 1
-        val user =  User(
-            id=user_id,
+        val user = User(
+            id = user_id,
             userid = user_id.toString(),
             name = request.username,
             password = request.password,
             token = token,
-            device_id="efwe",
+            device_id = "efwe",
             dateCreated = LocalDateTime(2018, 1, 4, 3, 4)
         )
         DatabaseRepo.customerStorage.add(user)
