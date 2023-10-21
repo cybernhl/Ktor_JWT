@@ -12,18 +12,12 @@ import io.ktor.server.auth.principal
 import io.ktor.server.plugins.openapi.openAPI
 import io.ktor.server.plugins.swagger.swaggerUI
 import io.ktor.server.request.receiveNullable
-import io.ktor.server.request.receiveParameters
 import io.ktor.server.response.respond
 import io.ktor.server.response.respondText
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.swagger.codegen.v3.generators.html.StaticHtmlCodegen
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.async
-import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import kotlinx.datetime.LocalDateTime
 import tw.idv.neo.shared.data.dto.request.LoginInfo
 import tw.idv.neo.shared.data.dto.request.RegisterInfo
@@ -34,7 +28,6 @@ import java.util.Date
 import tw.idv.neo.multiplatform.shared.db.User
 import tw.idv.neo.shared.db.JdbcDbRepo
 import tw.idv.neo.shared.db.usecase.UserCase
-
 val tokenService = JwtTokenService()
 private val dbRepo = JdbcDbRepo()//can use di !!
 private val dbHolder = dbRepo.buildDatabaseInstanceIfNeed()
@@ -197,27 +190,6 @@ fun Route.signUp(tokenConfig: TokenConfig) {
             prepare_token = prepare_token.withClaim(it.key, it.value)
         }
         val token = prepare_token.sign(Algorithm.HMAC256(tokenConfig.secret))
-        //FIXME customerStorage is fake db !! use Arraylist  , real is  useCase &  dbRepo
-        var user_id = DatabaseRepo.customerStorage.size + 1
-////        val user =  User(
-//            id=user_id,
-//            userid = user_id.toString(),
-//            name = request.username,
-//            password = request.password,
-//            token = token,
-//            device_id="efwe",
-//            dateCreated = LocalDateTime(2018, 1, 4, 3, 4)
-//        )
-////        DatabaseRepo.customerStorage.add(user)
-
-//        launch {
-//            useCase.getAllUsers().collectLatest { its ->
-//                its.forEach {
-//                    println("Show all users it : $it")
-//                }
-//            }
-//        }
-
         var result = ApiBaseItem<AccountInfo>(
             code = HttpStatusCode.Created.value,
             message = HttpStatusCode.Created.description,
@@ -227,40 +199,31 @@ fun Route.signUp(tokenConfig: TokenConfig) {
             )
         )
         println("Show default result  $result")
-        launch {//FIXME　 launch not work !!
-            val usersAndInsertResult = async {
-                val allUsers = useCase.getAllUsers().collect {
-                    val insertResult = useCase.insertUser(
-                        userid = (it.size + 1).toString(),
-                        name = request.username,
-                        password = request.password,
-                        token = token,
-                        device_id = "efwe"
-                    )
-                    insertResult
-                }
-            }
-            val rrttt = usersAndInsertResult.await()
-            println("Show db Insert Result $rrttt")
-            println("Show default result @launch $result")
 
-            //FIXME　 user_id　must from useCase.getAllUsers() result size +1
-            val db_result = useCase.insertUser(
-                userid = user_id.toString(),
+        useCase.getAllUsers().collect {
+            val insertResult = useCase.insertUser(
+                userid = (it.size + 1).toString(),
                 name = request.username,
                 password = request.password,
                 token = token,
                 device_id = "efwe"
             )
-            // FIXME respond by db_result
-            // if  db_result ==1   is insert succeed result data is AccountInfo  or data is null
-            println("Show insert User into db  result $db_result")
-            if (db_result == 0L) {
+//            launch { //TODO for debug
+//                useCase.getAllUsers().collectLatest { its ->
+//                    its.forEach {
+//                        println("Show all users it : $it")
+//                    }
+//                }
+//            }
+            println("Show insertResult  $insertResult")
+            if (insertResult == 0L) {// insert  fail
                 result = ApiBaseItem<AccountInfo>(
                     code = HttpStatusCode.Created.value,
                     message = HttpStatusCode.Created.description,
                     data = null
                 )
+                println("Show  final  result   $result")
+                call.respond(HttpStatusCode.Created, result)
             } else {
                 result = ApiBaseItem<AccountInfo>(
                     code = HttpStatusCode.Created.value,
@@ -270,39 +233,9 @@ fun Route.signUp(tokenConfig: TokenConfig) {
                         token = token
                     )
                 )
+                call.respond(HttpStatusCode.Created, result)
             }
-            println("Show  final  result @launch  $result")
-//        call.respond(HttpStatusCode.Created, result) //FIXME　if here   "call.respond" get "  404 Not Found: POST - /signUp"
         }
-        val db_result = useCase.insertUser(
-            userid = user_id.toString(),//FIXME user_id　must from useCase.getAllUsers() result size +1
-            name = request.username,
-            password = request.password,
-            token = token,
-            device_id = "efwe"
-        )
-        // FIXME respond by db_result
-        // if  db_result ==1   is insert succeed result data is AccountInfo  or data is null
-        println("Show insert User into db  result $db_result")
-        if (db_result == 0L) {// insert  fail
-            result = ApiBaseItem<AccountInfo>(
-                code = HttpStatusCode.Created.value,
-                message = HttpStatusCode.Created.description,
-                data = null
-            )
-        } else {
-            result = ApiBaseItem<AccountInfo>(
-                code = HttpStatusCode.Created.value,
-                message = HttpStatusCode.Created.description,
-                data = AccountInfo(
-                    username = request.username,
-                    token = token
-                )
-            )
-        }
-        // FIXME respond result wait db_result -- insert User into db
-        println("Show  final  result   $result")
-        call.respond(HttpStatusCode.Created, result)
     }
 }
 
